@@ -63,7 +63,7 @@ class Game:
         self.player_hand_total = add(self.player_hand)
 
 
-        # Check if dealer has 21
+        # Check if dealer has 21 (blackjack)
         if self.dealer_hand_total == 21:
             # if player also has 21, then the round ends in a tie, a.k.a 'push'
             if self.player_hand_total == 21:
@@ -76,6 +76,13 @@ class Game:
                 print_hands(self)
                 print('lose')
                 return 'lose'
+            
+        
+        # Check if player has 21 (blackjack), if so, is immediately paid out... already checked if dealer has 21 above
+        if self.player_hand_total == 21:
+            print_hands(self)
+            print('win')
+            return 'win'
 
 
 
