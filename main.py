@@ -18,11 +18,14 @@ def main():
             print('Error occured, you did not input a valid number\n')
             continue
     
-    for x in range(3):
-        temp = game.match()
-        print(temp)
-        update_wallet(game,temp)
-        print(game.player_wallet)
+    # for _ in range(1):
+    #     temp = game.match()
+    #     print(temp)
+    #     update_wallet(game,temp)
+    #     print(game.player_wallet)
+
+    temp = game.match()
+    print(temp)
 
 
 
