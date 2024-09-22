@@ -5,7 +5,7 @@ from new_classes import Game
 def match(game: Game) -> None: # Just updates player.player_log and player.player_wallet
 
     from functions import draw
-    print('accessed')
+
 
     # Checking all player's wallets, making sure they can bet the minimum at least before the match starts
     # NOTE: may need to add some functionality to add players to game somewhere
@@ -29,7 +29,6 @@ def match(game: Game) -> None: # Just updates player.player_log and player.playe
 
     # deal starting cards (2 cards) to everyone, including the dealer, going around in a circle
     for _ in range(2):
-        print('accessed2')
 
         # each players' hand(s) draws a card
         for player in game.playerlist:
@@ -39,6 +38,7 @@ def match(game: Game) -> None: # Just updates player.player_log and player.playe
 
         # dealer draws
         draw(game.deck, game.dealer_hand)
+    
 
     ### NOTE: need to change things starting from here to hand.hand, which is the actual list of cards in the hand object
 
@@ -49,7 +49,6 @@ def match(game: Game) -> None: # Just updates player.player_log and player.playe
             while True:
                 try: # ... round(float(... , 2)) converts user input into a float and then rounds to 2 decimal places
                     hand.hand_bet = round(float(input(f'\nhow much would you like to bet? For this game, bet minimum is ${game.minimum_bet}: ')) , 2)
-                    print('accessed4')
 
                     if hand.hand_bet >= game.minimum_bet:
                         print(f'\nConfirmed. Player has bet ${hand.hand_bet} on this match')
@@ -81,8 +80,8 @@ def match(game: Game) -> None: # Just updates player.player_log and player.playe
                     #hand.active just checks if the hand has already been evaluated, so it won't be evaluated again later
                     hand.active = False
 
-                    print_hand(game.dealer_hand)
-                    print_hand(hand)
+                    print_hand(game.dealer_hand, 'dealer')
+                    print_hand(hand.hand, 'player')
                     print('tie')
                 
                 else:
@@ -91,8 +90,8 @@ def match(game: Game) -> None: # Just updates player.player_log and player.playe
                     # player wallet lose money based on amoung bet on the hand
                     player.player_wallet += -hand.hand_bet
                     hand.active = False
-                    print_hand(game.dealer_hand)
-                    print_hand(hand)
+                    print_hand(game.dealer_hand, 'dealer')
+                    print_hand(hand.hand, 'player')
                     print('lose')
             
             ## If dealer didn't automatically win, then time to evaluate the player's cards
@@ -102,15 +101,15 @@ def match(game: Game) -> None: # Just updates player.player_log and player.playe
                 player.player_wallet += hand.hand_bet
                 hand.active = False
                 
-                print_hand(game.dealer_hand)
-                print_hand(hand)
+                print_hand(game.dealer_hand, 'dealer')
+                print_hand(hand.hand, 'player')
                 print('win')
             
 
             ## Player options for every hand now, if no automatic wins
             while True:
                 print_dealer_hand_hidden(game.dealer_hand)
-                print_hand(hand)
+                print_hand(hand.hand, 'player')
                 hand.hand_input = input("what would you like to do?: \n")
 
                 # Player schooses to stand
@@ -153,8 +152,8 @@ def match(game: Game) -> None: # Just updates player.player_log and player.playe
                 player.player_log.append(-hand.hand_bet)
                 player.player_wallet += -hand.hand_bet
                 hand.active = False
-                print_hand(game.dealer_hand)
-                print_hand(hand)
+                print_hand(game.dealer_hand, 'dealer')
+                print_hand(hand.hand, 'player')
                 print('lose')
                 
 
@@ -176,16 +175,16 @@ def match(game: Game) -> None: # Just updates player.player_log and player.playe
                 player.player_log.append(hand.hand_bet)
                 player.player_wallet += hand.hand_bet
                 hand.active = False
-                print_hand(game.dealer_hand)
-                print_hand(hand)
+                print_hand(game.dealer_hand, 'dealer')
+                print_hand(hand.hand, 'player')
                 print('win')
             
             # if dealer and player have the same total
             if game.dealer_hand_total == hand.total and hand.active == True:
                 player.player_log.append(0.00)
                 hand.active = False
-                print_hand(game.dealer_hand)
-                print_hand(hand)
+                print_hand(game.dealer_hand, 'dealer')
+                print_hand(hand.hand, 'player')
                 print('tie')
             
             # if dealer has higher
@@ -193,8 +192,8 @@ def match(game: Game) -> None: # Just updates player.player_log and player.playe
                 player.player_log.append(-hand.hand_bet)
                 player.player_wallet += -hand.hand_bet
                 hand.active = False
-                print_hand(game.dealer_hand)
-                print_hand(hand)
+                print_hand(game.dealer_hand, 'dealer')
+                print_hand(hand.hand, 'player')
                 print('lose')
             
             # if player has higher
@@ -202,8 +201,8 @@ def match(game: Game) -> None: # Just updates player.player_log and player.playe
                 player.player_log.append(hand.hand_bet)
                 player.player_wallet += hand.hand_bet
                 hand.active = False
-                print_hand(game.dealer_hand)
-                print_hand(hand)
+                print_hand(game.dealer_hand, 'dealer')
+                print_hand(hand.hand, 'player')
                 print('win')
 
     return            
