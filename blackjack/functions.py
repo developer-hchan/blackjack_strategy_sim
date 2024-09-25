@@ -1,10 +1,10 @@
-from new_classes import Game
+from classes import Game
 
 # 1 round / match of blackjack
 # NOTE: will break dow match() into smaller functions in the future
 def match(game: Game) -> None: # Just updates player.player_log and player.player_wallet
 
-    from functions import draw
+    from classes import draw
 
 
     # Checking all player's wallets, making sure they can bet the minimum at least before the match starts
@@ -66,7 +66,7 @@ def match(game: Game) -> None: # Just updates player.player_log and player.playe
     ### Starting Evaluations of all hands and all players
     ###
 
-    from new_classes import draw_notRandom
+    from classes import draw_notRandom
 
     for player in game.playerlist:
         for hand in player.player_hands:
@@ -257,7 +257,7 @@ def match(game: Game) -> None: # Just updates player.player_log and player.playe
 
 # The purpose of this function is so that I can write less print statements in the match() function
 def print_hand(hand, person: str): # person can be 'dealer' or 'player'
-    from new_classes import add
+    from classes import add
 
     # player hand total
     print(f"\n{person} has a hand total of: {add(hand)}")

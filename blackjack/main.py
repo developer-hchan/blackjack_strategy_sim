@@ -1,6 +1,6 @@
 # Have a game object
-from new_classes import *
-from new_functions import match
+from classes import *
+from functions import match
 game = Game()
 
 # a function to adjust default game settings, eles use init default

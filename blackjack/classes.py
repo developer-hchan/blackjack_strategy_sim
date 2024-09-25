@@ -3,7 +3,7 @@
 # this is where the magic happens
 class Game:
     def __init__(self):
-        from functions import create_deck
+        from classes import create_deck
 
         # by default, the game object will use a standard 52 deck
         self.deck: list[Card] = create_deck()
