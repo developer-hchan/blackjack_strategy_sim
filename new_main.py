@@ -17,7 +17,7 @@ for idx, player in enumerate(game.playerlist):
             break
         # If the user doesn't input a float or an int for their wallet, the program will fail to convert it to a float... i.e. float() and throw an error
         except:
-            print('Error occured, you did not input a valid number\n')
+            print('\nError occured, you did not input a valid number')
             continue
     
 
@@ -25,6 +25,7 @@ for idx, player in enumerate(game.playerlist):
 match(game)
 
 
+# NOTE: temporary, just to makes sure that I'm getting the expected outputs
 for player in game.playerlist:
     
     for x in player.player_log:

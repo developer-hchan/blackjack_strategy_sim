@@ -1,7 +1,7 @@
 from new_classes import Game
 
 # 1 round / match of blackjack
-# maybe a generator that stores results, then 
+# NOTE: will break dow match() into smaller functions in the future
 def match(game: Game) -> None: # Just updates player.player_log and player.player_wallet
 
     from functions import draw
@@ -22,9 +22,8 @@ def match(game: Game) -> None: # Just updates player.player_log and player.playe
             else:
                 continue
 
-        #NOTE: check if this else statement causes problems in the future... right now, it is not interferring with the if statements below...
         else:
-            print(f'Player\'s current wallet: {player.player_wallet}')
+            print(f'\nPlayer\'s current wallet: {player.player_wallet}')
 
 
     # deal starting cards (2 cards) to everyone, including the dealer, going around in a circle
@@ -54,18 +53,21 @@ def match(game: Game) -> None: # Just updates player.player_log and player.playe
                         print(f'\nConfirmed. Player has bet ${hand.hand_bet} on this match')
                         break
                     else:
-                        print(f'Error occured, your bet of ${hand.hand_bet} is less than the minimum bet of ${game.minimum_bet}\n')
+                        print(f'\nError occured, your bet of ${hand.hand_bet} is less than the minimum bet of ${game.minimum_bet}')
                         continue
 
                 # if the code in the try block fails to convert the input into a float, the exception block will run
                 except:
-                    print('Error occured, you did not input a valid number for your bet\n')
+                    print('\nError occured, you did not input a valid number for your bet')
                     continue
 
 
     ###
     ### Starting Evaluations of all hands and all players
     ###
+
+    from new_classes import draw_notRandom
+
     for player in game.playerlist:
         for hand in player.player_hands:
 
@@ -107,10 +109,10 @@ def match(game: Game) -> None: # Just updates player.player_log and player.playe
             
 
             ## Player options for every hand now, if no automatic wins
-            while True:
+            while True and hand.active == True:
                 print_dealer_hand_hidden(game.dealer_hand)
                 print_hand(hand.hand, 'player')
-                hand.hand_input = input("what would you like to do?: \n")
+                hand.hand_input = input("\nwhat would you like to do?: \n")
 
                 # Player schooses to stand
                 if hand.hand_input == "stand":
@@ -131,15 +133,56 @@ def match(game: Game) -> None: # Just updates player.player_log and player.playe
                 #TODO: make this option toggable, based on if the game allows this function
 
 
-                # Player chooses to "double down" a.k.a "double"
-                # Doubling means doubling your bet in exchange for only drawing one card
-                # TODO: add a check to make sure the player has enough money to even double down
+                # Player chooses to "double down" a.k.a "double": This means doubling your bet in exchange for only drawing one card
                 elif hand.hand_input == "double":
-                    pass
+                    
+                    # player.player_betStack + hand.hand_bet === putting hand.hand_bet*2 in the betStack effectively
+                    if player.player_betStack + hand.hand_bet > player.player_wallet:
+                        print(f'\nPlayer wallet has ${player.player_wallet}, which is not enough to double down')
+                        continue
+                    elif len(hand.hand) != 2:
+                        print(f'\nPlayer cannot double as they have already hit')
+                        continue
+                    else:
+                        # doubling the bet on hand
+                        hand.hand_bet *= 2
+                        # double down is only allowed to draw one card
+                        draw(game.deck, hand.hand)
+                        break
 
-                #TODO: implement when betting is a part of the game
+
+                # Player chooses to split
                 elif hand.hand_input == "split":
-                    pass
+
+                    # splitting effectively doubles your bet, since the same size bet needs to be put on the new hand
+                    # player.player_betStack + hand.hand_bet === putting hand.hand_bet*2 in the betStack effectively
+                    if player.player_betStack + hand.hand_bet > player.player_wallet:
+                        print(f'\nPlayer wallet has ${player.player_wallet}, which is not enough to split')
+                        continue
+                    elif len(hand.hand) != 2:
+                        print(f'\nPlayer cannot split as they do not have 2 cards in their hand')
+                        continue
+                    elif hand.hand[0].number != hand.hand[1].number:
+                        print(f'\nPlayer cannot split as they do not have 2 matching cards')
+                        continue
+                    # creating two new hands and putting them in player.player_hands; deactivating current hand so it won't be evaluated
+                    else:
+                        # creates and appends two new hands with bets equivalent to the orginal hand
+                        player.add_hand(hand.hand_bet)
+                        player.add_hand(hand.hand_bet)
+                        
+                        # takes the first card from current hand, adds it to the 2nd to last hand in player_hands
+                        draw_notRandom(hand.hand, player.player_hands[len(player.player_hands - 2), 0])
+
+                        # takes the first card from current hand, adds it to the last hand in player_hands
+                        draw_notRandom(hand.hand, player.player_hands[len(player.player_hands - 1), 0])
+
+                        # deactivating the current hand so it will not be evaluated, which should now be empty
+                        hand.active = False
+
+                        # back to the for loop to let the other hands be evaluated... well in theory
+                        # NOTE: may not work
+                        continue
 
 
                 else:
@@ -197,7 +240,7 @@ def match(game: Game) -> None: # Just updates player.player_log and player.playe
                 print('lose')
             
             # if player has higher
-            if hand.total > game.dealer_hand_total:
+            if hand.total > game.dealer_hand_total and hand.active == True:
                 player.player_log.append(hand.hand_bet)
                 player.player_wallet += hand.hand_bet
                 hand.active = False
@@ -216,22 +259,28 @@ def match(game: Game) -> None: # Just updates player.player_log and player.playe
 def print_hand(hand, person: str): # person can be 'dealer' or 'player'
     from new_classes import add
 
-    print("\n")
+    # player hand total
+    print(f"\n{person} has a hand total of: {add(hand)}")
 
+    # player's cards
     for card in hand:
-        print(card)
-    print(f"{person} has: {add(hand)}\n")
+        print(f'card: {card}')
+    
 
 
 # this is the print hands function that hides one of the dealer's cards from the player
 def print_dealer_hand_hidden(dealer_hand):
-    print("\n")
     
-    # dealer face down card
-    print('? of ?')
+    #showing dealer face up card
+    print(f'\ndealer has a {dealer_hand[0]} + ? for a total of: ?')
 
     # dealer face up card
-    print(dealer_hand[0])
+    print(f'card: {dealer_hand[0]}')
+    
+    # dealer face down card
+    print('card: ? of ?')
 
-    print(f'dealer has: {dealer_hand[0]} + ?\n')
+    
+
+    
 

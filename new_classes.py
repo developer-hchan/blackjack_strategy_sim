@@ -121,11 +121,11 @@ def create_deck() -> list[Card]:
 # A hand of Cards that goes to a player
 class Hand:
         
-    def __init__(self):
+    def __init__(self, bet=0.00):
         self.hand: list[Card] = []
 
         # how much the player is currently betting
-        self.hand_bet: float = 0.00
+        self.hand_bet: float = bet
 
         # this is used to see if a hand has already been evaluated
         self.active = True
@@ -154,10 +154,22 @@ class Player:
         # records the plus/minus of the player's choices
         self.player_log: list[float] = []
 
+
+    # the total bet from all the player's hands
+    @property
+    def player_betStack(self) -> float:
+        
+        betStack = 0
+
+        for hand in self.player_hands:
+            betStack += hand.hand_bet
+
+        return betStack
+
+
     # adding a Hand Object to a Player Object
-    def add_hand(player):
-        hand = Hand()
-        player.player_hands.append(hand)
+    def add_hand(self, bet):
+        self.player_hands.append(Hand(bet))
 
 
 # adds a card from the game.deck into the inputted hand (dealer or player)
@@ -169,7 +181,13 @@ def draw(deck: list[Card], hand: list[Card]) -> None:
 
     hand.append(deck[idx])
     deck.pop(idx)
+    
 
+# adds a card from the game.deck into the inputted hand (dealer or player)
+def draw_notRandom(deck: list[Card], hand: list[Card], idx: int) -> None:
+
+    hand.append(deck[idx])
+    deck.pop(idx)
 
 
 
