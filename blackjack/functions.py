@@ -1,7 +1,33 @@
 from classes import Game
 
+# The purpose of this function is so that I can write less print statements in the match() function
+def print_hand(hand, person: str): # person can be 'dealer' or 'player'
+    from classes import add
+
+    # player hand total
+    print(f"\n{person} has a hand total of: {add(hand)}")
+
+    # player's cards
+    for card in hand:
+        print(f'card: {card}')
+
+
+# this is the print hands function that hides one of the dealer's cards from the player
+def print_dealer_hand_hidden(dealer_hand):
+    
+    #showing dealer face up card
+    print(f'\ndealer has a {dealer_hand[0]} + ? for a total of: ?')
+
+    # dealer face up card
+    print(f'card: {dealer_hand[0]}')
+    
+    # dealer face down card
+    print('card: ? of ?')
+
+
+
 # 1 round / match of blackjack
-# NOTE: will break dow match() into smaller functions in the future
+# TODO: will break dow match() into smaller functions in the future
 def match(game: Game) -> None: # Just updates player.player_log and player.player_wallet
 
     from classes import draw
@@ -255,30 +281,7 @@ def match(game: Game) -> None: # Just updates player.player_log and player.playe
 
 
 
-# The purpose of this function is so that I can write less print statements in the match() function
-def print_hand(hand, person: str): # person can be 'dealer' or 'player'
-    from classes import add
 
-    # player hand total
-    print(f"\n{person} has a hand total of: {add(hand)}")
-
-    # player's cards
-    for card in hand:
-        print(f'card: {card}')
-    
-
-
-# this is the print hands function that hides one of the dealer's cards from the player
-def print_dealer_hand_hidden(dealer_hand):
-    
-    #showing dealer face up card
-    print(f'\ndealer has a {dealer_hand[0]} + ? for a total of: ?')
-
-    # dealer face up card
-    print(f'card: {dealer_hand[0]}')
-    
-    # dealer face down card
-    print('card: ? of ?')
 
     
 
