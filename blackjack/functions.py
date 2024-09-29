@@ -1,5 +1,6 @@
 from classes import Game
 
+
 # The purpose of this function is so that I can write less print statements in the match() function
 def print_hand(hand, person: str): # person can be 'dealer' or 'player'
     from classes import add
@@ -25,24 +26,19 @@ def print_dealer_hand_hidden(dealer_hand):
     print('card: ? of ?')
 
 
-
-# 1 round / match of blackjack
-# TODO: will break dow match() into smaller functions in the future
-def match(game: Game) -> None: # Just updates player.player_log and player.player_wallet
-
-    from classes import draw
-
-
-    # Checking all player's wallets, making sure they can bet the minimum at least before the match starts
-    # NOTE: may need to add some functionality to add players to game somewhere
+# Checking all player's wallets, making sure they can bet the minimum at least before the match starts
+def checkPlayerWallet(game: Game):
     for idx, player in enumerate(game.playerlist):
 
         if player.player_wallet < game.minimum_bet:
             print(f'Player has ${player.player_wallet}, ${game.minimum_bet} is needed to play a match')
+            # removing a player without enough money from the game
             game.playerlist.pop(idx)
 
             # in case there was only one player in the game, and they were removed, need to end the match because it can't be played
             if len(game.playerlist) == 0:
+                # TODO: eventually give players a str function, and generate names
+                print(f'player has been removed due to lack of funds')
                 print('game lacks players to be played')
                 return
             else:
@@ -52,22 +48,12 @@ def match(game: Game) -> None: # Just updates player.player_log and player.playe
             print(f'\nPlayer\'s current wallet: {player.player_wallet}')
 
 
-    # deal starting cards (2 cards) to everyone, including the dealer, going around in a circle
-    for _ in range(2):
+# TODO: update python console response (print statements) to include the names of each hand
+# TODO: probably update the Hand() class to include a name object that generators new names from a seperate integer generator
+# TODO: and a __str__ method
+# player's bet money on all their hand for the match
+def playerBetHands(game: Game):
 
-        # each players' hand(s) draws a card
-        for player in game.playerlist:
-            for hand in player.player_hands:
-                # NOTE: hand.hand ... hand. is the hand object ... .hand is the list of cards in the hand object
-                draw(game.deck, hand.hand)
-
-        # dealer draws
-        draw(game.deck, game.dealer_hand)
-    
-
-    ### NOTE: need to change things starting from here to hand.hand, which is the actual list of cards in the hand object
-
-    # the first thing that happens in a match is that the player(s) must bet money for each of their hands
     for player in game.playerlist:
         for hand in player.player_hands:
 
@@ -88,12 +74,8 @@ def match(game: Game) -> None: # Just updates player.player_log and player.playe
                     continue
 
 
-    ###
-    ### Starting Evaluations of all hands and all players
-    ###
-
-    from classes import draw_notRandom
-
+# Card evaluation I: Checking for blackjacks from the dealer and players in the game
+def check4Blackjack(game: Game) -> None: # just updates player_log and hand.active if applicable
     for player in game.playerlist:
         for hand in player.player_hands:
 
@@ -132,13 +114,29 @@ def match(game: Game) -> None: # Just updates player.player_log and player.playe
                 print_hand(game.dealer_hand, 'dealer')
                 print_hand(hand.hand, 'player')
                 print('win')
-            
 
-            ## Player options for every hand now, if no automatic wins
-            while True and hand.active == True:
+
+## player choice on what to do with their hands
+def playerChoice(game: Game, choice: str = None):
+
+    from classes import draw
+    from classes import draw_notRandom
+    
+    for player in game.playerlist:
+        for hand in player.player_hands:
+            
+            # equivalent to "while true", but has the condition a player needs to have an active hand to get hand options
+            while any(hand.active == True for hand in player.player_hands):
                 print_dealer_hand_hidden(game.dealer_hand)
                 print_hand(hand.hand, 'player')
-                hand.hand_input = input("\nwhat would you like to do?: \n")
+
+                #NOTE: this check below is for testing purpose, and won't work with multiple hands, so it's temporary
+                # for multiple hands probably need to make the while and for loop external, and make some return so the external while can work
+                if choice != None:
+                    hand.hand_input = choice
+                else:
+                    hand.hand_input = input("\nwhat would you like to do?: \n")
+
 
                 # Player schooses to stand
                 if hand.hand_input == "stand":
@@ -155,7 +153,7 @@ def match(game: Game) -> None: # Just updates player.player_log and player.playe
                     else:
                         continue
 
-                # Player chooses to surrender
+                #TODO: Player chooses to surrender
                 #TODO: make this option toggable, based on if the game allows this function
 
 
@@ -210,12 +208,47 @@ def match(game: Game) -> None: # Just updates player.player_log and player.playe
                         # NOTE: may not work
                         continue
 
-
                 else:
                     print('\n*****************************\n*bad input, please try again*\n*****************************\n')
                     continue
 
-            ## final evaluation w/o dealer
+
+# 1 round / match of blackjack
+# TODO: will break down match() into smaller functions in the future
+def match(game: Game) -> None: # Just updates player.player_log and player.player_wallet
+
+    from classes import draw
+
+    # NOTE: may need to add some functionality to add players to game somewhere
+
+    # Checking all player's wallets, making sure they can bet the minimum at least before the match starts
+    checkPlayerWallet(game)
+
+    # deal starting cards (2 cards) to everyone, including the dealer, going around in a circle
+    for _ in range(2):
+
+        # each players' hand(s) draws a card
+        for player in game.playerlist:
+            for hand in player.player_hands:
+                # NOTE: hand.hand ... hand. is the hand object ... .hand is the list of cards in the hand object
+                draw(game.deck, hand.hand)
+
+        # dealer draws
+        draw(game.deck, game.dealer_hand)
+    
+    # The first thing that happens in a match is that the player(s) must bet money for each of their hands
+    playerBetHands(game)
+
+    # checking to see if the dealer or the player automatically wins from blackjack
+    check4Blackjack(game)
+    
+    # player's choose what to do with all their hands
+    playerChoice(game)
+
+    ## checking if player's busted before the dealer draws (this is how they do it in the casinos)
+    for player in game.playerlist:
+        for hand in player.player_hands:
+
             # If hand busted (over 21)
             if hand.total > 21 and hand.active == True:
                 player.player_log.append(-hand.hand_bet)
@@ -224,7 +257,7 @@ def match(game: Game) -> None: # Just updates player.player_log and player.playe
                 print_hand(game.dealer_hand, 'dealer')
                 print_hand(hand.hand, 'player')
                 print('lose')
-                
+        
 
     #TODO: add a check if the rules state a dealer hits on a soft 17
     # Dealer turn ~ dealer keeps hit until higher than 17
@@ -232,10 +265,7 @@ def match(game: Game) -> None: # Just updates player.player_log and player.playe
         draw(game.deck, game.dealer_hand)
 
 
-    ###
-    ### Final Evaluation After Player and Dealer have gone
-    ###
-
+    ### Final Evaluation After Player and Dealer have fnished
     for player in game.playerlist:
         for hand in player.player_hands:
 
