@@ -133,10 +133,24 @@ class Hand:
         # the player's choice on what to do dfor each hand
         self.hand_input: str = None
 
+        # just number the hands as their created, and that's their name... they are made via generator
+        self.name: int = next(handNames)
+
+    def __str__(self):
+        return f'HAND {self.name}'
+
     # get current int total of hand; auto-updates
     @property
     def total(self) -> int:
         return add(self.hand)
+
+# generating the names for the hands
+def numberGen():
+    for x in range(1,21):
+        yield x
+
+# storing the generator
+handNames = numberGen()
 
 
 # a Player can have multiple Hands
@@ -174,20 +188,12 @@ class Player:
 
 # adds a card from the game.deck into the inputted hand (dealer or player)
 def draw(deck: list[Card], hand: list[Card]) -> None:
-    import random
-
-    # generates a random idx
-    idx = random.randint(0,len(deck)-1)
-
-    hand.append(deck[idx])
-    deck.pop(idx)
+    hand.append(deck[0])
+    deck.pop(0)
     
-
-# adds a card from the game.deck into the inputted hand (dealer or player)
-def draw_notRandom(deck: list[Card], hand: list[Card], idx: int) -> None:
-
-    hand.append(deck[idx])
-    deck.pop(idx)
+def shuffleDeck(deck: list[Card]):
+    import random
+    random.shuffle(deck)
 
 
 

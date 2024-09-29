@@ -21,9 +21,13 @@ for idx, player in enumerate(game.playerlist):
             continue
     
 
+# shuffling deck
+shuffleDeck(game.deck)
+
 # a single match of a blackjack game -> return plus/minus
 match(game)
 
+print('\n')
 
 # NOTE: temporary, just to makes sure that I'm getting the expected outputs
 for player in game.playerlist:
