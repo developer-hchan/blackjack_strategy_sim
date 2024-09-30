@@ -52,26 +52,29 @@ def checkPlayerWallet(game: Game):
 # TODO: probably update the Hand() class to include a name object that generators new names from a seperate integer generator
 # TODO: and a __str__ method
 # player's bet money on all their hand for the match
-def playerBetHands(game: Game):
+def playerBetHands(game: Game, sim_bet: float = None):
 
     for player in game.playerlist:
         for hand in player.player_hands:
+            
+            if sim_bet == None:
+                while True:
+                    try: # ... round(float(... , 2)) converts user input into a float and then rounds to 2 decimal places
+                        hand.hand_bet = round(float(input(f'\nhow much would you like to bet? For this game, bet minimum is ${game.minimum_bet}: ')) , 2)
 
-            while True:
-                try: # ... round(float(... , 2)) converts user input into a float and then rounds to 2 decimal places
-                    hand.hand_bet = round(float(input(f'\nhow much would you like to bet? For this game, bet minimum is ${game.minimum_bet}: ')) , 2)
+                        if hand.hand_bet >= game.minimum_bet:
+                            print(f'\nConfirmed. Player has bet ${hand.hand_bet} on this match')
+                            break
+                        else:
+                            print(f'\nError occured, your bet of ${hand.hand_bet} is less than the minimum bet of ${game.minimum_bet}')
+                            continue
 
-                    if hand.hand_bet >= game.minimum_bet:
-                        print(f'\nConfirmed. Player has bet ${hand.hand_bet} on this match')
-                        break
-                    else:
-                        print(f'\nError occured, your bet of ${hand.hand_bet} is less than the minimum bet of ${game.minimum_bet}')
+                    # if the code in the try block fails to convert the input into a float, the exception block will run
+                    except:
+                        print('\nError occured, you did not input a valid number for your bet')
                         continue
-
-                # if the code in the try block fails to convert the input into a float, the exception block will run
-                except:
-                    print('\nError occured, you did not input a valid number for your bet')
-                    continue
+            else:
+                hand.hand_bet = sim_bet
 
 
 # Card evaluation I: Checking for blackjacks from the dealer and players in the game
@@ -115,7 +118,8 @@ def check4Blackjack(game: Game) -> None: # just updates player_log and hand.acti
                 print_hand(hand.hand, 'player')
                 print('win')
 
-
+##NOTE: eventually there will be an issue with mutliple hands, of certain options, like automatic blackjacks or surrenders showing the dealer's hand (to include the face down card)
+##NOTE: before potentially all hands are played; however, it works with only one player in the game for now
 ## player choice on what to do with their hands
 def playerChoice(game: Game, choice: str = None):
 
@@ -155,8 +159,16 @@ def playerChoice(game: Game, choice: str = None):
                         else:
                             continue
 
-                    #TODO: Player chooses to surrender
                     #TODO: make this option toggable, based on if the game allows this function
+                    #Player chooses to surrender
+                    elif hand.hand_input == "surrender":
+                        player.player_log.append(-hand.hand_bet*0.5)
+                        player.player_wallet -= hand.hand_bet*0.5
+                        hand.active = False
+                        print_hand(game.dealer_hand, 'dealer')
+                        print_hand(hand.hand, 'player')
+                        print('lose, half bet taken')
+                        break
 
 
                     # Player chooses to "double down" a.k.a "double": This means doubling your bet in exchange for only drawing one card
@@ -224,6 +236,46 @@ def playerChoice(game: Game, choice: str = None):
             # goes to this else if hand.active is false for current hand; continues the "for loop", not the "while loop"
             else:
                 continue
+        
+
+def evaluation(game: Game) -> None:
+    for player in game.playerlist:
+        for hand in player.player_hands:
+
+            # if dealer bust, player immediate win
+            if game.dealer_hand_total > 21 and hand.active == True:
+                player.player_log.append(hand.hand_bet)
+                player.player_wallet += hand.hand_bet
+                hand.active = False
+                print_hand(game.dealer_hand, 'dealer')
+                print_hand(hand.hand, 'player')
+                print('win')
+            
+            # if dealer and player have the same total
+            if game.dealer_hand_total == hand.total and hand.active == True:
+                player.player_log.append(0.00)
+                hand.active = False
+                print_hand(game.dealer_hand, 'dealer')
+                print_hand(hand.hand, 'player')
+                print('tie')
+            
+            # if dealer has higher
+            if game.dealer_hand_total > hand.total and hand.active == True:
+                player.player_log.append(-hand.hand_bet)
+                player.player_wallet += -hand.hand_bet
+                hand.active = False
+                print_hand(game.dealer_hand, 'dealer')
+                print_hand(hand.hand, 'player')
+                print('lose')
+            
+            # if player has higher
+            if hand.total > game.dealer_hand_total and hand.active == True:
+                player.player_log.append(hand.hand_bet)
+                player.player_wallet += hand.hand_bet
+                hand.active = False
+                print_hand(game.dealer_hand, 'dealer')
+                print_hand(hand.hand, 'player')
+                print('win')
 
 
 # 1 round / match of blackjack
@@ -276,43 +328,27 @@ def match(game: Game) -> None: # Just updates player.player_log and player.playe
             draw(game.deck, game.dealer_hand)
 
         ### Final Evaluation After Player and Dealer have fnished
-        for player in game.playerlist:
-            for hand in player.player_hands:
+        evaluation(game)
 
-                # if dealer bust, player immediate win
-                if game.dealer_hand_total > 21 and hand.active == True:
-                    player.player_log.append(hand.hand_bet)
-                    player.player_wallet += hand.hand_bet
-                    hand.active = False
-                    print_hand(game.dealer_hand, 'dealer')
-                    print_hand(hand.hand, 'player')
-                    print('win')
-                
-                # if dealer and player have the same total
-                if game.dealer_hand_total == hand.total and hand.active == True:
-                    player.player_log.append(0.00)
-                    hand.active = False
-                    print_hand(game.dealer_hand, 'dealer')
-                    print_hand(hand.hand, 'player')
-                    print('tie')
-                
-                # if dealer has higher
-                if game.dealer_hand_total > hand.total and hand.active == True:
-                    player.player_log.append(-hand.hand_bet)
-                    player.player_wallet += -hand.hand_bet
-                    hand.active = False
-                    print_hand(game.dealer_hand, 'dealer')
-                    print_hand(hand.hand, 'player')
-                    print('lose')
-                
-                # if player has higher
-                if hand.total > game.dealer_hand_total and hand.active == True:
-                    player.player_log.append(hand.hand_bet)
-                    player.player_wallet += hand.hand_bet
-                    hand.active = False
-                    print_hand(game.dealer_hand, 'dealer')
-                    print_hand(hand.hand, 'player')
-                    print('win')
+        # clearing all hands
+        clearGameHands(game)
+    
     else:
-        return            
+        clearGameHands(game)
+        return
+
+
+# clears the hand of the players in game
+def clearGameHands(game: Game):
+    from classes import Hand
+
+    # reseting dealer's hand
+    game.dealer_hand = []
+    
+    # all player's get reset to having one empty hand at the end of a match
+    for player in game.playerlist:
+        player.player_hands = [Hand()]
+
+
+
 

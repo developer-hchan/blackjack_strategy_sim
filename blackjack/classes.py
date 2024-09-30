@@ -130,27 +130,13 @@ class Hand:
         # this is used to see if a hand has already been evaluated
         self.active = True
 
-        # the player's choice on what to do dfor each hand
+        # the player's choice on what to do for each hand
         self.hand_input: str = None
-
-        # just number the hands as their created, and that's their name... they are made via generator
-        self.name: int = next(handNames)
-
-    def __str__(self):
-        return f'HAND {self.name}'
 
     # get current int total of hand; auto-updates
     @property
     def total(self) -> int:
         return add(self.hand)
-
-# generating the names for the hands
-def numberGen():
-    for x in range(1,21):
-        yield x
-
-# storing the generator
-handNames = numberGen()
 
 
 # a Player can have multiple Hands

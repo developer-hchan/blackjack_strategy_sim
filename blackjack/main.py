@@ -26,6 +26,7 @@ shuffleDeck(game.deck)
 
 # a single match of a blackjack game -> return plus/minus
 match(game)
+match(game)
 
 print('\n')
 
