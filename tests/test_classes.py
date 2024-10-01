@@ -1,12 +1,15 @@
 import unittest
 
-class TestFunctions(unittest.TestCase):
+from blackjack.classes import add
+from blackjack.classes import Card
+
+
+class TestClasses(unittest.TestCase):
+    
     
     # testing to make sure the add function is adding hands correctly
     def test_add(self):
-        from functions import add
-        from classes import Card
-
+        
         # testing basic addition
         hand_1: list[Card] = [Card(7,'Spade'), Card(8,'Heart')]
 
@@ -74,6 +77,13 @@ class TestFunctions(unittest.TestCase):
         self.assertEqual(hand_total_4,20)
         self.assertEqual(hand_total_5,21)
         self.assertEqual(hand_total_6,14)
+
+    
+    def test_split(self):
+        pass
+
+    
+
 
 
 if __name__ == '__main__':
